@@ -1,0 +1,21 @@
+variable "tenant_id" {
+  type        = string
+  description = "Entra tenant ID"
+}
+
+variable "break_glass_object_ids" {
+  type        = list(string)
+  description = "Object IDs of break-glass accounts, excluded from every CA policy"
+}
+
+variable "admin_role_template_ids" {
+  type        = map(string)
+  description = "Entra role template IDs for admin-scoped policies"
+  default = {
+    global_admin          = "62e90394-69f5-4237-9190-012177145e10"
+    privileged_role_admin = "e8611ab8-c189-46e8-94e1-60213ab1f814"
+    security_admin        = "194ae4cb-b126-40b2-bd5b-6091b380977d"
+    sharepoint_admin      = "f28a1f50-f6e7-4571-818b-6a12f2af6b6c"
+    exchange_admin        = "29232cdf-9323-42fd-ade2-1d097af3e4de"
+  }
+}
