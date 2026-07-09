@@ -1,7 +1,6 @@
 # MITRE ATT&CK Mapping
 
-How each Conditional Access pattern maps to adversary techniques. Tactic references are
-MITRE ATT&CK Enterprise.
+How each pattern maps to adversary techniques. Tactic references are MITRE ATT&CK Enterprise.
 
 | Pattern | ATT&CK Technique | Tactic | Control type |
 |---------|------------------|--------|--------------|
@@ -12,12 +11,18 @@ MITRE ATT&CK Enterprise.
 | 05 High user risk → password change | [T1078](https://attack.mitre.org/techniques/T1078/) Valid Accounts (leaked creds) | Persistence | Corrective (remediation) |
 | 06 Medium sign-in risk → MFA | [T1078](https://attack.mitre.org/techniques/T1078/) Valid Accounts | Initial Access | Corrective (step-up) |
 | 07 Compliant device (admins) | [T1078.004](https://attack.mitre.org/techniques/T1078/004/) Cloud Accounts | Persistence | Preventive |
+| 08 Location-based controls | [T1078](https://attack.mitre.org/techniques/T1078/) Valid Accounts | Initial Access | Preventive |
+| 09 Require app protection policy | [T1528](https://attack.mitre.org/techniques/T1528/) Steal Application Access Token | Credential Access | Preventive |
+| 10 Sign-in frequency (sensitive apps) | [T1550.001](https://attack.mitre.org/techniques/T1550/001/) Application Access Token | Defense Evasion / Lateral Movement | Preventive |
+| 11 Require admin consent for OAuth apps | [T1528](https://attack.mitre.org/techniques/T1528/) Steal Application Access Token | Credential Access | Preventive |
 
 ## Coverage notes
 
-- **Credential Access (TA0006):** patterns 01, 03 — the primary defensive cluster.
-- **Valid Accounts (T1078) family:** patterns 02, 04, 05, 06, 07 — layered by signal
-  (identity, session risk, account risk, device).
+- **Credential Access (TA0006):** patterns 01, 03, 09, 11 — the primary defensive cluster.
+- **Valid Accounts (T1078) family:** patterns 02, 04, 05, 06, 07, 08 — layered by signal
+  (identity, session risk, account risk, device, location).
+- **Application Access Token (T1528 / T1550.001):** patterns 09, 10, 11 — protect the token
+  layer via app protection, short session lifetime, and consent restriction.
 - **Risk tiers:** 04 (high sign-in → block), 06 (medium sign-in → MFA), 05 (high user → password change)
   form a graduated response rather than a single blunt block.
 
