@@ -8,6 +8,12 @@ variable "break_glass_object_ids" {
   description = "Object IDs of break-glass accounts, excluded from every CA policy"
 }
 
+variable "sensitive_app_ids" {
+  type        = list(string)
+  description = "App IDs treated as sensitive (shorter session lifetime)"
+  default     = ["797f4846-ba00-4fd7-ba43-dac1f8f63013"] # Windows Azure Service Management API (Azure portal/ARM)
+}
+
 variable "admin_role_template_ids" {
   type        = map(string)
   description = "Entra role template IDs for admin-scoped policies"
@@ -18,4 +24,6 @@ variable "admin_role_template_ids" {
     sharepoint_admin      = "f28a1f50-f6e7-4571-818b-6a12f2af6b6c"
     exchange_admin        = "29232cdf-9323-42fd-ade2-1d097af3e4de"
   }
+
+
 }

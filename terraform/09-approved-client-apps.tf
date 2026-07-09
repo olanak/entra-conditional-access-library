@@ -1,5 +1,5 @@
 resource "azuread_conditional_access_policy" "ca09_approved_client_apps" {
-  display_name = "CA09 - Require Approved Client Apps (Mobile/Desktop)"
+  display_name = "CA09 - Require App Protection Policy (Mobile)"
   state        = local.default_state
 
   conditions {
@@ -20,8 +20,9 @@ resource "azuread_conditional_access_policy" "ca09_approved_client_apps" {
     }
   }
 
+
   grant_controls {
     operator          = "OR"
-    built_in_controls = ["approvedApplication"]
+    built_in_controls = ["compliantApplication"]
   }
 }
