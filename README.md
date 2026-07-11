@@ -42,8 +42,8 @@ the correct tool is a deliberate design choice.
 | 09 | Require app protection policy | Data leak to unmanaged apps | T1528 | P1 + Intune | Terraform | Live (report-only) |
 | 10 | Sign-in frequency (sensitive apps) | Token replay | T1550.001 | P1 | Terraform | Live (report-only) |
 | 11 | Require admin consent for OAuth apps | Illicit consent grants | T1528 | P1 | Graph PowerShell | Live (enforced) |
-| 12 | Continuous Access Evaluation | Token revocation latency | T1550.001 | P1 | Terraform | Planned |
-| 13 | Workload identity CA policy | Service principal abuse | T1078.004 | Workload Identities P1 | Terraform | Planned |
+| 12 | Secure security-info registration | MFA-registration hijack | T1556.006, T1098.005 | P1 | Terraform | Live (report-only) |
+| 13 | Workload identity CA policy | Service principal abuse | T1078.004 | Workload ID Premium | Terraform | Code-complete (license-gated) |
 | 14 | App-enforced restrictions | Data exfiltration | T1567 | P1 | Terraform | Planned |
 | 15 | Block guest access to sensitive groups | Lateral movement | T1078.003 | P1 | Terraform | Planned |
 | 16 | PIM — just-in-time admin activation | Standing privilege | T1078.004 | P2 | Graph PowerShell | Planned |
@@ -98,8 +98,9 @@ Conditional Access requires Entra ID **P1**; the risk-based patterns (04–06) r
 
 ## Status
 
-Active development — 11 of 17 patterns deployed (10 Conditional Access in report-only, plus
-the pattern 11 tenant authorization setting).
+Active development — 13 of 17 patterns. 12 deployed (11 Conditional Access in report-only
+plus the pattern 11 tenant authorization setting); pattern 13 is code-complete but not
+deployed, gated on a separate Workload Identities Premium license.
 
 ## License
 
