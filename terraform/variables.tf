@@ -8,6 +8,12 @@ variable "break_glass_object_ids" {
   description = "Object IDs of break-glass accounts, excluded from every CA policy"
 }
 
+variable "protected_service_principal_ids" {
+  type        = list(string)
+  description = "Object IDs of single-tenant service principals to protect with CA (requires Workload Identities Premium)"
+  default     = []  # populate when the Workload ID license is available
+}
+
 variable "sensitive_app_ids" {
   type        = list(string)
   description = "App IDs treated as sensitive (shorter session lifetime)"
