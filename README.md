@@ -1,31 +1,34 @@
 # Entra Conditional Access Library
 
-Production-ready Microsoft Entra ID **Conditional Access** policy patterns, mapped to
-MITRE ATT&CK identity techniques, deployed as code via **Terraform** (`azuread`), with
-**Microsoft Graph PowerShell** for tenant-policy and PIM patterns that Terraform does not cover.
+[![Terraform Validate](https://github.com/olanak/entra-conditional-access-library/actions/workflows/terraform-validate.yml/badge.svg)](https://github.com/olanak/entra-conditional-access-library/actions/workflows/terraform-validate.yml)
+[![PowerShell Lint](https://github.com/olanak/entra-conditional-access-library/actions/workflows/powershell-lint.yml/badge.svg)](https://github.com/olanak/entra-conditional-access-library/actions/workflows/powershell-lint.yml)
+
+Production-ready Microsoft Entra ID identity-security patterns as code — Conditional Access,
+tenant authorization, and Privileged Identity Management — mapped to MITRE ATT&CK and
+deployed via **Terraform** (`azuread`) and **Microsoft Graph PowerShell**.
 
 > ⚠️ **Read [`docs/break-glass-accounts.md`](docs/break-glass-accounts.md) before deploying anything.**
 > Every policy excludes two emergency Global Admin accounts to prevent tenant lockout.
 
 ## Overview
 
-A reference library that treats Conditional Access as versioned, testable infrastructure
-rather than manual portal configuration. Each pattern is a complete unit: the policy
-definition, the attack it defends against (mapped to MITRE ATT&CK), test scenarios, and a
-rollback path.
+This library treats identity security as versioned, testable infrastructure rather than
+manual portal configuration. Each pattern is a self-contained unit: the definition, the
+attack it defends against (mapped to MITRE ATT&CK), test scenarios, and a rollback path.
 
 Most patterns are Conditional Access policies deployed with Terraform. A few controls are
-not Conditional Access policies at all (tenant authorization settings, PIM); those are
-deployed with Microsoft Graph PowerShell and documented as such — routing each control to
-the correct tool is a deliberate design choice.
+not Conditional Access policies at all — a tenant authorization setting and two PIM controls
+— and are deployed with Microsoft Graph PowerShell. Routing each control to the correct tool
+is a deliberate design decision, recorded in [`docs/adr/0001-deployment-tooling.md`](docs/adr/0001-deployment-tooling.md).
 
 ## Design principles
 
 - **Report-only first.** Every Conditional Access pattern ships in `enabledForReportingButNotEnforced`; enforce only after reviewing logs.
-- **Break-glass always excluded.** Two emergency accounts, outside every policy.
+- **Break-glass always excluded.** Two emergency accounts, created before any policy, excluded from every policy.
 - **Attack-mapped.** Each pattern names the ATT&CK technique it defends against — see [`ATTACK-MAPPING.md`](ATTACK-MAPPING.md).
-- **One source of truth.** Terraform HCL defines each CA policy; docs live beside it, not duplicated.
-- **Right tool per control.** CA policies in Terraform; tenant/authorization and PIM controls in Graph PowerShell.
+- **One source of truth.** Terraform HCL defines each CA policy; documentation lives beside it, never duplicated.
+- **Right tool per control.** CA policies in Terraform; tenant-authorization and PIM controls in Graph PowerShell.
+- **Detect, not just prevent.** A Microsoft Sentinel layer validates that policies behave as intended — see [`docs/monitoring.md`](docs/monitoring.md).
 
 ## Patterns
 
@@ -44,22 +47,29 @@ the correct tool is a deliberate design choice.
 | 11 | Require admin consent for OAuth apps | Illicit consent grants | T1528 | P1 | Graph PowerShell | Live (enforced) |
 | 12 | Secure security-info registration | MFA-registration hijack | T1556.006, T1098.005 | P1 | Terraform | Live (report-only) |
 | 13 | Workload identity CA policy | Service principal abuse | T1078.004 | Workload ID Premium | Terraform | Code-complete (license-gated) |
-| 14 | App-enforced restrictions | Data exfiltration | T1567 | P1 | Terraform | Planned |
-| 15 | Block guest access to sensitive groups | Lateral movement | T1078.003 | P1 | Terraform | Planned |
-| 16 | PIM — just-in-time admin activation | Standing privilege | T1078.004 | P2 | Graph PowerShell | Planned |
-| 17 | PIM — access reviews for privileged roles | Privilege creep | T1098 | P2 | Graph PowerShell | Planned |
+| 14 | App-enforced restrictions | Data exfiltration | T1567 | P1 | Terraform | Live (report-only) |
+| 15 | Block guest access to sensitive resources | Lateral movement | T1078.003 | P1 | Terraform | Live (report-only) |
+| 16 | PIM — just-in-time admin activation | Standing privilege | T1078.004 | P2 | Graph PowerShell | Live (enforced) |
+| 17 | PIM — access reviews for privileged roles | Privilege creep | T1098 | P2 | Graph PowerShell | Live (enforced) |
+
+16 of 17 patterns are deployed to a live tenant; pattern 13 is code-complete but not
+deployed, gated on a separate Workload Identities Premium license (documented, not faked).
 
 ## Repository structure
 
 ```
-terraform/            # source of truth — CA patterns (one NN-*.tf each)
+terraform/            # source of truth — Conditional Access patterns (one NN-*.tf each)
 scripts/
   consent/            # pattern 11 — tenant authorization policy (Graph PowerShell)
   pim/                # patterns 16-17 — PIM (Graph PowerShell)
-patterns/NN-*/        # README + test-scenarios per pattern (docs)
-docs/                 # break-glass, prerequisites, testing, monitoring, adr/
+patterns/NN-*/        # README + test-scenarios per pattern (documentation)
+docs/                 # break-glass, prerequisites, testing, monitoring, decision docs, adr/
 archive/              # retired policy.json + deploy.ps1 (history)
-.github/workflows/    # terraform validate/fmt + policy lint
+.github/workflows/    # terraform validate/fmt + PowerShell lint (CI)
+README.md
+DECISION-FRAMEWORK.md
+ATTACK-MAPPING.md
+DEPLOYMENT-GUIDE.md
 ```
 
 ## Quick start
@@ -77,31 +87,22 @@ Deploy a single Conditional Access pattern:
 terraform apply -target=azuread_conditional_access_policy.ca01_block_legacy_auth
 ```
 
-Non-Terraform patterns are run from `scripts/` — see each pattern's README (e.g. pattern 11).
+Non-Terraform patterns run from `scripts/` — see each pattern's README (11, 16, 17).
 
 Set `tenant_id` and `break_glass_object_ids` in `terraform/terraform.tfvars` first.
 
-## Tooling
+## Documentation
 
-Terraform for Conditional Access; Microsoft Graph PowerShell for controls the `azuread`
-provider does not expose (tenant authorization policy in pattern 11, PIM in 16–17).
-Rationale is recorded in
-[`docs/adr/0001-deployment-tooling.md`](docs/adr/0001-deployment-tooling.md) — Bicep was
-evaluated and rejected because its Microsoft Graph extension has no
-`conditionalAccessPolicies` resource type.
+- [`DEPLOYMENT-GUIDE.md`](DEPLOYMENT-GUIDE.md) — how to deploy safely (report-only → enforce).
+- [`DECISION-FRAMEWORK.md`](DECISION-FRAMEWORK.md) — which pattern to apply when; Security Defaults vs Conditional Access.
+- [`ATTACK-MAPPING.md`](ATTACK-MAPPING.md) — full MITRE ATT&CK coverage matrix.
+- [`docs/prerequisites.md`](docs/prerequisites.md) — licensing, roles, tooling.
+- [`docs/testing-strategy.md`](docs/testing-strategy.md) — the report-only → enforce lifecycle.
+- [`docs/monitoring.md`](docs/monitoring.md) — Sentinel detections that validate the patterns.
+- [`docs/break-glass-accounts.md`](docs/break-glass-accounts.md) — emergency access, read first.
 
 ## Licensing
 
-Conditional Access requires Entra ID **P1**; the risk-based patterns (04–06) require **P2**
-(Identity Protection). Some patterns additionally require Microsoft Intune. See
-[`docs/prerequisites.md`](docs/prerequisites.md).
-
-## Status
-
-Active development — 13 of 17 patterns. 12 deployed (11 Conditional Access in report-only
-plus the pattern 11 tenant authorization setting); pattern 13 is code-complete but not
-deployed, gated on a separate Workload Identities Premium license.
-
-## License
-
-MIT
+Conditional Access requires Entra ID **P1**; the risk-based patterns (04–06) and PIM (16–17)
+require **P2**. Patterns 07 and 09 additionally require Microsoft Intune; pattern 13 requires
+Workload Identities Premium. See [`docs/prerequisites.md`](docs/prerequisites.md).
