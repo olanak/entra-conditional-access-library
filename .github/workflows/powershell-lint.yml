@@ -1,6 +1,7 @@
 name: PowerShell Lint
 
 on:
+  workflow_dispatch:  
   push:
     branches: [main]
     paths: ['scripts/**']
